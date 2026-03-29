@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegram-bot
+  namespace: grupo0x
+  labels:
+    app: telegram-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegram-bot
+  template:
+    metadata:
+      labels:
+        app: telegram-bot
+    spec:
+      # Agregamos el secret para bajar la imagen desde el registry
+      imagePullSecrets:
+        - name: my-registry-secret
+      containers:
+        - name: telegram-bot
+          image: xxxxx
+          envFrom:
+            - configMapRef:
+                name: xxxx
+            - secretRef:
+                name: xxxx
+          
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: xxxxx
+                  key: postgres-password
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - 'curl -fsSL "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates" > /dev/null || exit 0'
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - 'curl -fsSL "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates" > /dev/null || exit 0'
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources:
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+      restartPolicy: Always

@@ -1,0 +1,33 @@
+# Biblioteca para crear bots de Telegram
+python-telegram-bot
+
+# Framework base para crear aplicaciones con LLMs
+langchain
+
+# Framework para crear agentes y flujos de trabajo con LLMs
+langgraph
+
+# Biblioteca para integrar modelos de Google Gemini en LangChain
+langchain-google-genai
+
+# Biblioteca para integrar modelos de Groq en LangChain
+langchain-groq
+
+# Biblioteca para integrar prompts de LangChain Hub en LangChain
+langchainhub
+
+# Componentes comunitarios para LangChain (incluye conectores a bases de datos)
+langchain-community
+
+# psycopg2-binary: Adaptador binario para PostgreSQL.
+# Proporciona las bibliotecas precompiladas necesarias para conectar y ejecutar consultas en bases de datos PostgreSQL.
+# Es ideal para entornos de desarrollo, aunque en producción se recomienda evaluar si es mejor instalar la versión compilada.
+psycopg2-binary
+
+# SQLAlchemy: Toolkit y ORM para Python.
+# Permite interactuar con bases de datos de forma declarativa y orientada a objetos,
+# facilitando la construcción, ejecución y gestión de consultas SQL, además de abstraer las diferencias entre distintos motores.
+SQLAlchemy
+
+# Biblioteca para cargar variables de entorno desde un archivo .env.
+python-dotenv

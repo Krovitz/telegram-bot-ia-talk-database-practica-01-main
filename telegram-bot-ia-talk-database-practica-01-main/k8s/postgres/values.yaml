@@ -1,0 +1,27 @@
+# https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
+# helm install helm-postgres oci://registry-1.docker.io/bitnamicharts/postgresql  -f values.yaml
+global:
+  
+  storageClass: "local-path"
+
+auth:
+  database: "bot"
+
+architecture: standalone
+
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring       # Donde está corriendo Prometheus Operator
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: prometheus       # Ajustar si usás otro nombre para el release de Prometheus
