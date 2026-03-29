@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 # API Keys
 def setup_api_keys():
     """Set up required API keys."""
-    if not os.environ.get("GROQ_API_KEY"):
-        raise ValueError("GROQ_API_KEY environment variable is not set.")
+    if not os.environ.get("GOOGLE_API_KEY"):
+        raise ValueError("GOOGLE_API_KEY environment variable is not set.")
 
 # Telegram Bot Token
 def get_telegram_token():

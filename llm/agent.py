@@ -2,10 +2,11 @@
 LLM and agent setup module.
 """
 import os
-from langchain_groq import ChatGroq
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 from langgraph.prebuilt import create_react_agent
 from config import logger
+
 
 class LLMAgent:
     """Class to manage the LLM agent and tools."""
@@ -14,10 +15,16 @@ class LLMAgent:
         """Initialize the LLM and toolkit with the given database."""
         logger.info("Setting up LLM agent...")
         self.db = db
-        # Use llama-3.3-70b-versatile, temperature 0 for tool calling reliability in Groq
-        self.llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+
+        # Google Gemini model
+        self.llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            temperature=0,
+            google_api_key=os.getenv("GOOGLE_API_KEY")
+        )
+
         self.toolkit = SQLDatabaseToolkit(db=db, llm=self.llm)
- 
+
         # Minimalist SQL Agent System Prompt to avoid tool-calling conflicts
         system_prompt_str = (
             "You are an expert SQL assistant. Your goal is to help users query a {dialect} database. "
@@ -25,6 +32,7 @@ class LLMAgent:
         )
         dialect = os.getenv("DB_DIALECT", "SQLite")
         self.system_message = system_prompt_str.format(dialect=dialect, top_k=5)
+
         logger.info("LLM agent setup complete")
 
     def create_agent(self):

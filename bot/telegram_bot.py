@@ -6,6 +6,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from config import logger
 
+
 class TelegramBot:
     """Class to manage the Telegram bot and handlers."""
 
@@ -21,8 +22,9 @@ class TelegramBot:
         logger.info("Setting up Telegram bot handlers...")
         self.application.add_handler(CommandHandler("start", self.start))
         self.application.add_handler(CommandHandler("help", self.help_command))
-        self.application.add_handler(MessageHandler(
-            filters.TEXT & ~filters.COMMAND, self.handle_message))
+        self.application.add_handler(
+            MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
+        )
         self.application.add_error_handler(self.error_handler)
 
     def run(self):
@@ -47,34 +49,44 @@ class TelegramBot:
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle incoming messages and process them with the LLM agent."""
         user_message = update.message.text
+
         try:
-            # Create agent executor for this query
+            # Crear agente
             agent_executor = self.llm_agent.create_agent()
 
-            # Send initial processing message
+            # Mensaje inicial
             processing_message = await update.message.reply_text("Procesando tu solicitud...")
 
-            # Initialize streaming variables
+            # Variables para streaming
             full_response = ""
             last_response = ""
             last_update_time = time.time()
-            update_interval = 1.0  # Update every second
+            update_interval = 1.0  # segundos
 
-            # Stream of events
+            # Stream de eventos
             events = agent_executor.stream(
                 {"messages": [("user", user_message)]},
                 stream_mode="values",
             )
 
-            # Process events stream
             for event in events:
                 if "messages" in event and len(event["messages"]) > 0:
-                    # Get the latest response chunk
-                    current_response = event["messages"][-1].content
+                    raw_content = event["messages"][-1].content
+
+                    # 🔥 CONVERSIÓN CORRECTA A TEXTO
+                    if isinstance(raw_content, list):
+                        current_response = ""
+                        for item in raw_content:
+                            if isinstance(item, dict) and "text" in item:
+                                current_response += item["text"]
+                    elif isinstance(raw_content, str):
+                        current_response = raw_content
+                    else:
+                        current_response = str(raw_content)
+
                     if current_response and current_response != last_response:
                         full_response = current_response
 
-                        # Update message only after interval and if content has changed
                         current_time = time.time()
                         if (current_time - last_update_time >= update_interval) and (full_response != last_response):
                             try:
@@ -86,11 +98,10 @@ class TelegramBot:
                                 last_response = full_response
                                 last_update_time = current_time
                             except Exception as edit_error:
-                                # Ignore identical content errors
                                 if "Message is not modified" not in str(edit_error):
                                     logger.warning(f"Error editing message: {edit_error}")
 
-            # Ensure final complete message is sent
+            # Mensaje final
             if full_response != last_response:
                 try:
                     await context.bot.edit_message_text(
